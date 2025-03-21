@@ -14,6 +14,18 @@ class Graph:
         self.adjacency_list[city1][city2] = distance
         self.adjacency_list[city2][city1] = distance 
 
+    def bfs(self, start):
+        print("BFS")
+        visiteds = set()
+        queue = [start]
+        while queue:
+            vertex = queue.pop(0)
+            if vertex not in visiteds:
+                print(vertex, end=" ")
+                visiteds.add(vertex)
+                queue.extend(self.adjacency_list[vertex])
+        print() 
+
 if __name__ == "__main__":
     from random import randint
     graph = Graph()
@@ -28,4 +40,6 @@ if __name__ == "__main__":
     roads = [(city1, city2, randint(10, 100)) for city1, city2 in edges]
     for c1, c2, km in roads:
         graph.connect(c1, c2, km)
+    print("Adjacency List")
     [print(city, neighbors)  for city, neighbors in graph.adjacency_list.items()]
+    graph.bfs("A")

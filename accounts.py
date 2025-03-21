@@ -1,6 +1,7 @@
 class Graph:
     def __init__(self):
         self.transfers = {}
+        self.detected_cycles = []
     
     def add_transfer(self, origin, destination, value):
         if origin not in self.transfers:
@@ -11,22 +12,28 @@ class Graph:
         visited[node] = True
         stack[node] = True
         path.append(node)
+
         for neighbor in self.transfers.get(node, []):
             if not visited.get(neighbor, False):
                 self._dfs(neighbor, visited, stack, path)
             elif stack.get(neighbor, False):
-                path.append(neighbor)
-                print("Cycle found:", " -> ".join(path))
-                self._check_values(path)
+                cycle_start = path.index(neighbor)
+                cycle = path[cycle_start:] + [neighbor]
+                if cycle not in self.detected_cycles:
+                    self.detected_cycles.append(cycle)
+                    print("Cycle found:", " -> ".join(cycle))
+                    self._check_values(cycle)
+        
         stack[node] = False
         path.pop()
-    
+
     def _check_values(self, path, tolerance=0.2, high_value_threshold=100000):
         cycle_values = []
         for i in range(len(path) - 1):
             origin, destination = path[i], path[i + 1]
             if origin in self.transfers and destination in self.transfers[origin]:
                 cycle_values.append(self.transfers[origin][destination])
+
         if cycle_values:
             avg_value = sum(cycle_values) / len(cycle_values)
             values_similar = all(abs(val - avg_value) <= avg_value * tolerance for val in cycle_values)
@@ -45,8 +52,10 @@ if __name__ == "__main__":
     graph.add_transfer("A", "B", 100000)
     graph.add_transfer("B", "C", 120000)
     graph.add_transfer("C", "D", 1230)
+    graph.add_transfer("C", "A", 1230)
     graph.add_transfer("C", "E", 132000)
     graph.add_transfer("E", "F", 113000)
     graph.add_transfer("F", "G", 112000)
     graph.add_transfer("G", "C", 110000)
+    graph.add_transfer("H", "A", 1230)
     graph.search_cycles()
